@@ -49,10 +49,16 @@ int main(){
 
 	// setup triangle
 	float vertices[] = {
-		-0.5f, -0.5f, 0.0f,
-		0.5f, -0.5f, 0.0f,
-		0.0f, 0.5f, 0.0f
+		0.5f,  0.5f, 0.0f,  // top right
+		0.5f, -0.5f, 0.0f,  // bottom right
+    -0.5f, -0.5f, 0.0f,  // bottom left
+    -0.5f,  0.5f, 0.0f   // top left 
 	};
+
+	unsigned int indices[] = {  // note that we start from 0!
+    0, 1, 3,   // first triangle
+    1, 2, 3    // second triangle
+	}; 
 
 	unsigned int vbo_id;
 	glGenBuffers(1, &vbo_id); // create buffer
@@ -61,6 +67,10 @@ int main(){
 	unsigned int vao_id;
 	glGenVertexArrays(1, &vao_id);
 	glBindVertexArray(vao_id);
+
+	// element array object
+	unsigned int ebo_id;
+	glGenBuffers(1, &ebo_id);
 
 	glBindBuffer(
 		GL_ARRAY_BUFFER,
@@ -82,6 +92,9 @@ int main(){
 		(void*) 0
 	);
 	glEnableVertexAttribArray(0);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_id);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 	// create shaders
 	unsigned int vertexShader, fragmentShader;
@@ -122,8 +135,10 @@ int main(){
 	// main loop of the program
 	while(!glfwWindowShouldClose(window)){ // listen for close button pusing
 		glUseProgram(shaderProgram);
-		glBindVertexArray(vao_id);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		// glBindVertexArray(vao_id);
+		// glDrawArrays(GL_TRIANGLES, 0, 3);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_id);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents(); // listen to events happening (keypress, ...)
