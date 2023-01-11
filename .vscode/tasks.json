@@ -11,7 +11,7 @@
         "-Wall",
         "-g",
 
-        "${file}",
+        "${workspaceFolder}/source/main.cpp",
 
         "${workspaceFolder}/source/glad.c",
         "-I${workspaceFolder}/include",
@@ -19,7 +19,7 @@
         "-lglfw3",
         
         "-o",
-        "${fileDirname}/${fileBasenameNoExtension}",
+        "${workspaceFolder}/app.exe",
 
         "-framework",
         "OpenGL",
@@ -30,7 +30,7 @@
         "-Wno-deprecated"
       ],
       "options": {
-        "cwd": "${fileDirname}"
+        "cwd": "${workspaceFolder}"
       },
       "problemMatcher": [
         "$gcc"

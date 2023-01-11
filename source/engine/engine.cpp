@@ -2,23 +2,9 @@
 #define HIGINE_ENGINE
 
 #include "common.h"
-
+#include "shader/shader.cpp"
 
 using namespace std;
-
-const char *vertexShaderSource = "#version 330 core\n"
-"layout (location = 0) in vec3 aPos;\n"
-"void main()\n"
-"{\n"
-"   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-"}\0";
-
-const char *fragmentShaderSource = "#version 330 core\n"
-"out vec4 FragColor;\n"
-"void main()\n"
-"{\n"
-	"FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-"}\0";
 
 class engine
 {
@@ -37,6 +23,8 @@ private:
 
 	static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 	unsigned int shader_program, ebo_id;
+
+	shader vertex_shader, fragment_shader;
 
 public:
 	engine(/* args */);
@@ -58,8 +46,8 @@ engine::engine(/* args */)
 	// set hints for the next window that is gonna get created (setup the state of glfw)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
 	// create a window
 	window = glfwCreateWindow(800, 600, "Test", NULL, NULL);
@@ -118,11 +106,15 @@ engine::engine(/* args */)
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
 	// create shaders
+	vertex_shader = shader("/Users/willsamadi/dev/openGL/shaders/vertex.glsl");
+	fragment_shader = shader("/Users/willsamadi/dev/openGL/shaders/fragment.glsl");
 	unsigned int vertexShader, fragmentShader;
 	vertexShader = glCreateShader(GL_VERTEX_SHADER); // create empty vertex shader
 	fragmentShader = glCreateShader(GL_FRAGMENT_SHADER); // create empty fragment shader
-	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+	const char* sh = &vertex_shader.shader_content[0];
+	glShaderSource(vertexShader, 1, &sh, NULL);
+	sh = &fragment_shader.shader_content[0];
+	glShaderSource(fragmentShader, 1, &sh, NULL);
 	glCompileShader(vertexShader);
 	glCompileShader(fragmentShader);
 
@@ -155,12 +147,10 @@ engine::engine(/* args */)
 
 int engine::runloop(){
 	while(!glfwWindowShouldClose(window)){ // listen for close button pusing
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f );
+		glClearColor(1.0f, 1.0f, 1.0f, 1.0f );
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glUseProgram(shader_program);
-		// glBindVertexArray(vao_id);
-		// glDrawArrays(GL_TRIANGLES, 0, 3);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_id);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
