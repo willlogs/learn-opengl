@@ -4,17 +4,19 @@
 #include "common.h"
 #include "shader/shader.cpp"
 #include "shader/shaderProgram.cpp"
+#include "texture.cpp"
 
 using namespace std;
 
 class engine
 {
 private:
-	float vertices[12] = {
-		0.5f,  0.5f, 0.0f,  // top right
-		0.5f, -0.5f, 0.0f,  // bottom right
-    -0.5f, -0.5f, 0.0f,  // bottom left
-    -0.5f,  0.5f, 0.0f   // top left 
+	float vertices[32] = {
+		// position							// colors								// uv
+		0.5f,		0.5f,		0.0f,		1.0f,		0.0f,		0.0f,		0.0,		0.0,
+		0.5f,		-0.5f,	0.0f,		0.0f,		1.0f,		0.0f,		1.0,		0.0,
+    -0.5f, 	-0.5f, 	0.0f,		0.0f, 	0.0f,		1.0f,		1.0,		1.0,
+    -0.5f,	0.5f,		0.0f,		1.0f,		0.0f,		1.0f,		0.0,		1.0
 	};
 
 	unsigned int indices[6] = {
@@ -24,6 +26,8 @@ private:
 
 	static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 	unsigned int ebo_id;
+
+	texture test_texture;
 
 	shader vertex_shader, fragment_shader;
 	shaderProgram shader_program;
@@ -91,21 +95,47 @@ engine::engine(/* args */)
 		GL_STATIC_DRAW
 	); // fill in the buffer (this will fill vbo as that's what's bound to array_buffer)
 
+	// position
 	glVertexAttribPointer(
 		0,
 		3,
 		GL_FLOAT,
 		GL_FALSE,
-		3 * sizeof(float),
+		8 * sizeof(float),
 		(void*) 0
 	);
 	glEnableVertexAttribArray(0);
+
+	//color
+	glVertexAttribPointer(
+		1,
+		3,
+		GL_FLOAT,
+		GL_FALSE,
+		8 * sizeof(float),
+		(void*) (3 * sizeof(float))
+	);
+	glEnableVertexAttribArray(1);
+
+	// uv
+	glVertexAttribPointer(
+		2,
+		2,
+		GL_FLOAT,
+		GL_FALSE,
+		8 * sizeof(float),
+		(void *) (5 * sizeof(float)) 
+	);
+	glEnableVertexAttribArray(2);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_id);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 	// hookup resize callback
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+
+	// load texture
+	test_texture = texture("/Users/willsamadi/dev/openGL/textures/1.png");
 
 	// create shaders
 	vertex_shader = shader("/Users/willsamadi/dev/openGL/shaders/vertex.glsl", GL_VERTEX_SHADER);
@@ -129,6 +159,7 @@ int engine::runloop(){
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glUseProgram(shader_program.get_id());
+		glBindTexture(GL_TEXTURE_2D, test_texture.get_id());
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_id);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
