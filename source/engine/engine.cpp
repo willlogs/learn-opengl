@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "shader/shader.cpp"
+#include "shader/shaderProgram.cpp"
 
 using namespace std;
 
@@ -22,9 +23,10 @@ private:
 	}; 
 
 	static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-	unsigned int shader_program, ebo_id;
+	unsigned int ebo_id;
 
 	shader vertex_shader, fragment_shader;
+	shaderProgram shader_program;
 
 public:
 	engine(/* args */);
@@ -106,43 +108,19 @@ engine::engine(/* args */)
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
 	// create shaders
-	vertex_shader = shader("/Users/willsamadi/dev/openGL/shaders/vertex.glsl");
-	fragment_shader = shader("/Users/willsamadi/dev/openGL/shaders/fragment.glsl");
-	unsigned int vertexShader, fragmentShader;
-	vertexShader = glCreateShader(GL_VERTEX_SHADER); // create empty vertex shader
-	fragmentShader = glCreateShader(GL_FRAGMENT_SHADER); // create empty fragment shader
-	const char* sh = &vertex_shader.shader_content[0];
-	glShaderSource(vertexShader, 1, &sh, NULL);
-	sh = &fragment_shader.shader_content[0];
-	glShaderSource(fragmentShader, 1, &sh, NULL);
-	glCompileShader(vertexShader);
-	glCompileShader(fragmentShader);
+	vertex_shader = shader("/Users/willsamadi/dev/openGL/shaders/vertex.glsl", GL_VERTEX_SHADER);
+	vertex_shader.compile();
+	vertex_shader.check_compilation();
 
-	// check compile status
-	int  success;
-	char infoLog[512];
-
-	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-	if(!success)
-	{
-    glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-    std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
-	}
-
-	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-	if(!success)
-	{
-    glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-    std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
-	}
+	fragment_shader = shader("/Users/willsamadi/dev/openGL/shaders/fragment.glsl", GL_FRAGMENT_SHADER);
+	fragment_shader.compile();
+	fragment_shader.check_compilation();
 
 	// create shader program
-	shader_program = glCreateProgram();
-	glAttachShader(shader_program, vertexShader);
-	glAttachShader(shader_program, fragmentShader);
-	glLinkProgram(shader_program);
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragmentShader);
+	shader_program = shaderProgram(&vertex_shader, &fragment_shader);
+	glLinkProgram(shader_program.get_id());
+	vertex_shader.delete_shader();
+	fragment_shader.delete_shader();
 }
 
 int engine::runloop(){
@@ -150,7 +128,7 @@ int engine::runloop(){
 		glClearColor(1.0f, 1.0f, 1.0f, 1.0f );
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		glUseProgram(shader_program);
+		glUseProgram(shader_program.get_id());
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_id);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 

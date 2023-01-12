@@ -6,7 +6,7 @@
 
 using namespace std;
 
-class shader
+class shader : public utils::idable
 {
 private:
 	string path;
@@ -16,17 +16,22 @@ private:
 public:
 	const char* content;
 	string shader_content = "";
+	GLenum type = GL_VERTEX_SHADER;
 
 	shader();
-	shader(string path);
+	shader(string path, GLenum type);
 	~shader();
+	void compile();
+	void check_compilation();
+	void delete_shader();
 };
 
 shader::shader(){}
 
-shader::shader(string path)
+shader::shader(string path, GLenum type)
 {
 	this->path = path;
+	this->type = type;
 	read_from_path();
 }
 
@@ -51,4 +56,26 @@ void shader::read_from_path(){
 	read_stream.close();
 	content = &shader_content[0];
 }
+
+void shader::compile(){
+	id = glCreateShader(type);
+	const char* sh = &shader_content[0];
+	glShaderSource(id, 1, &sh, NULL);
+	glCompileShader(id);
+}
+
+void shader::check_compilation(){
+	int success;
+	char infoLog[512];
+	glGetShaderiv(id, GL_COMPILE_STATUS, &success);
+	if(!success){
+		glGetShaderInfoLog(id, 512, NULL, infoLog);
+		cout << "ERROR::SHADER::COMPILATION_FAILED" << infoLog << endl;
+	}
+}
+
+void shader::delete_shader(){
+	glDeleteShader(id);
+}
+
 #endif
