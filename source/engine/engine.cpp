@@ -135,7 +135,7 @@ engine::engine(/* args */)
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
 	// load texture
-	test_texture = texture("/Users/willsamadi/dev/openGL/textures/1.png");
+	test_texture = texture("/Users/willsamadi/dev/openGL/textures/wall.jpeg", GL_RGB);
 
 	// create shaders
 	vertex_shader = shader("/Users/willsamadi/dev/openGL/shaders/vertex.glsl", GL_VERTEX_SHADER);

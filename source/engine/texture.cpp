@@ -16,7 +16,7 @@ private:
 
 public:
 	texture();
-	texture(const char *path);
+	texture(const char *path, GLenum format);
 	~texture();
 };
 
@@ -24,7 +24,7 @@ texture::texture()
 {
 }
 
-texture::texture(const char *path){
+texture::texture(const char *path, GLenum format){
 	data = stbi_load(path, &width, &height, &nrChannels, 0);
 
 	if(data){
@@ -33,7 +33,7 @@ texture::texture(const char *path){
 		glBindTexture(GL_TEXTURE_2D, id);
 
 		// fill in the texture part of the context with data
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 		// generate mipmaps
 		glGenerateMipmap(GL_TEXTURE_2D);
 
